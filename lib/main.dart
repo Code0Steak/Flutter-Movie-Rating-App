@@ -543,7 +543,7 @@ class _MyAppState extends State<MyApp> {
         if (settings.name == '/') {
           return MaterialPageRoute(builder: (context) =>  HomePage(
         list: _list,
-        updateMovieList: _updateMovieList,
+      
       ),
       );
         } else if (settings.name?.startsWith('/movie') == true) {
@@ -554,7 +554,7 @@ class _MyAppState extends State<MyApp> {
               mov = _list[i];
             }
           }
-          return MaterialPageRoute(builder: (context) => MovieDetailsScreen(movie: mov!, updateMovieRating: updateMovieRating));
+          return MaterialPageRoute(builder: (context) => MovieDetailsScreen(movie: mov!, updateMovieList: _updateMovieList));
         }
 
         return null;
@@ -565,9 +565,18 @@ class _MyAppState extends State<MyApp> {
   }
 
   // Callback function to update the movie list
-  void _updateMovieList(List<MovieModel> updatedList) {
+  void _updateMovieList(MovieModel movie) {
+
+    var newLis = _list;
+
+    for(var i = 0; i < newLis.length; i++) {
+      if (newLis[i].id == movie.id) {
+        newLis[i].rating = movie.rating;
+      }
+    }
+
     setState(() {
-      _list = updatedList;
+      _list = newLis;
     });
   }
 }
@@ -602,14 +611,15 @@ class _MyAppState extends State<MyApp> {
 //     );
 //   }
 // }
+
 class MovieDetailsScreen extends StatefulWidget {
   final MovieModel movie;
-  final Function(MovieModel) updateMovieRating;
+  final Function(MovieModel) updateMovieList;
 
   const MovieDetailsScreen({
     Key? key,
     required this.movie,
-    required this.updateMovieRating,
+    required this.updateMovieList,
   }) : super(key: key);
 
   @override
@@ -617,7 +627,13 @@ class MovieDetailsScreen extends StatefulWidget {
 }
 
 class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
-  double _rating = 0.0; // Store the updated rating
+  late int _rating;
+
+  @override
+  void initState() {
+    super.initState();
+    _rating = widget.movie.rating;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -631,13 +647,13 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
           children: [
             Text("This movie ${widget.movie.name}"),
             const SizedBox(height: 20),
-            Text("Current Rating: ${widget.movie.rating}"),
+            Text("Current Rating: $_rating"),
             const SizedBox(height: 20),
             Slider(
-              value: _rating,
+              value: _rating.toDouble(),
               onChanged: (newValue) {
                 setState(() {
-                  _rating = newValue;
+                  _rating = newValue as int;
                 });
               },
               min: 0,
@@ -647,11 +663,11 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                // Update the movie's rating and call the callback to update _list
-                final updatedMovie = widget.movie.copyWith(rating: _rating);
-                widget.updateMovieRating(updatedMovie);
+                // Update the movie's rating and send it back to MyApp
+                widget.movie.rating = _rating;
+                widget.updateMovieList(widget.movie);
 
-                // Redirect to the root URL ('/') after saving the rating
+                // Close the MovieDetailsScreen and return to the previous screen (MyApp)
                 Navigator.pop(context);
               },
               child: const Text(
@@ -670,16 +686,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 }
 
 
-
 // HomePage
 class HomePage extends StatelessWidget {
   final List<MovieModel> list;
-  final Function(List<MovieModel>) updateMovieList;
+  
 
-  HomePage({
+  const HomePage({
     Key? key,
-    required this.list,
-    required this.updateMovieList,
+    required this.list
   }) : super(key: key);
 
   @override
@@ -806,13 +820,5 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Callback function to update the movie rating
-  void _updateMovieRating(MovieModel updatedMovie) {
-    final List<MovieModel> updatedList = List.from(list);
-    final index = updatedList.indexWhere((movie) => movie.id == updatedMovie.id);
-    if (index != -1) {
-      updatedList[index] = updatedMovie;
-      updateMovieList(updatedList);
-    }
-  }
+  
 }
