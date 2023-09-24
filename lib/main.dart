@@ -524,6 +524,14 @@ class _MyAppState extends State<MyApp> {
     _list = MovieModel.getMovies();
   }
 
+  void updateMovieRating(MovieModel movie){
+    for(var i = 0; i < _list.length; i++) {
+      if (_list[i].id == movie.id) {
+        _list[i].rating = movie.rating;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     getData();
@@ -539,9 +547,17 @@ class _MyAppState extends State<MyApp> {
       ),
       );
         } else if (settings.name?.startsWith('/movie') == true) {
-          final String ID = settings.name?.substring(7) ?? ''; //extract movie ID
-          return MaterialPageRoute(builder: (context) => MovieDetailsScreen(movieID: int.parse(ID), updateMovieRating: updateMovieRating))
+          final String id = settings.name?.substring(7) ?? ''; //extract movie ID
+          MovieModel? mov;
+          for (var i = 0; i < _list.length; i++) {
+            if (int.parse(id) == _list[i].id) {
+              mov = _list[i];
+            }
+          }
+          return MaterialPageRoute(builder: (context) => MovieDetailsScreen(movie: mov!, updateMovieRating: updateMovieRating));
         }
+
+        return null;
       },
       
       
@@ -556,6 +572,36 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
+
+// class MovieDetailsScreen extends StatelessWidget {
+//   final MovieModel movie;
+//   final Function(MovieModel) updateMovieRating;
+
+//   const MovieDetailsScreen({
+//     Key? key,
+//     required this.movie,
+//     required this.updateMovieRating,
+//   }) : super(key: key);
+  
+
+//   // Fetch movie details based on movieId and display them
+//   // You can use this.movieId to load the specific movie's details
+
+//   @override
+//   Widget build(BuildContext context) {
+//     // Build your movie detail screen based on the movieId
+//     // Fetch movie details and display them
+
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Movie Details'),
+//       ),
+//       body: Center(
+//         child: Text('Movie Details for ID: $movieId'),
+//       ),
+//     );
+//   }
+// }
 class MovieDetailsScreen extends StatefulWidget {
   final MovieModel movie;
   final Function(MovieModel) updateMovieRating;
@@ -575,9 +621,10 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Build the movie details/rating screen using the passed movie data.
     return Scaffold(
-      appBar: appBar(),
+      appBar: AppBar(
+        title: Text('Movie Details'),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -600,17 +647,12 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                // Update the movie's rating and send it back to HomePage
+                // Update the movie's rating and call the callback to update _list
                 final updatedMovie = widget.movie.copyWith(rating: _rating);
-                
+                widget.updateMovieRating(updatedMovie);
 
-                // Close the MovieDetailsScreen and return to the previous screen (HomePage)
-                if (widget.updateMovieRating != null) {
-      widget.updateMovieRating(updatedMovie);
-
-      // Close the MovieDetailsScreen and return to the previous screen (HomePage)
-      Navigator.pop(context, updatedMovie);
-    }
+                // Redirect to the root URL ('/') after saving the rating
+                Navigator.pop(context);
               },
               child: const Text(
                 'Save',
@@ -626,6 +668,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     );
   }
 }
+
+
 
 // HomePage
 class HomePage extends StatelessWidget {
@@ -669,7 +713,7 @@ class HomePage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 15,),
-        Container(
+        SizedBox(
           height: 500,
           child: ListView.separated(
             itemBuilder: (context, index) {
@@ -726,38 +770,22 @@ class HomePage extends StatelessWidget {
                       ),
                       child: Center(
                         child: GestureDetector(
-                          onTap: () async {
-                            // Navigate to MovieDetailsScreen and await result
-                            final updatedMovie = await Navigator.push<MovieModel>(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MovieDetailsScreen(
-                                  movie: list[index],
-                                  updateMovieRating: _updateMovieRating,
+                              onTap: () {
+                                final movieId = list[index].id; // Assuming you have a unique movie identifier
+                                final movieUrl = '/movie/$movieId'; // Create the movie URL
+                                Navigator.of(context).pushNamed(movieUrl);
+                              },
+                              child: Text(
+                                'View',
+                                style: TextStyle(
+                                  color: list[index].viewIsSelected
+                                      ? Colors.white
+                                      : const Color(0xffC58BF2),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
                                 ),
                               ),
-                            );
-
-                            // Check if the user made changes to the movie rating
-                            if (updatedMovie != null) {
-                              // Update the movie in the list and trigger a rebuild
-                              final List<MovieModel> updatedList =
-                                  List.from(list);
-                              updatedList[index] = updatedMovie;
-                              updateMovieList(updatedList);
-                            }
-                          },
-                          child: Text(
-                            'View',
-                            style: TextStyle(
-                              color: list[index].viewIsSelected
-                                  ? Colors.white
-                                  : const Color(0xffC58BF2),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
                             ),
-                          ),
-                        ),
                       ),
                     ),
                   ],
