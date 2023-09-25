@@ -40,6 +40,27 @@
   <script src="flutter.js" defer></script>
 </head>
 <body>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-auth-compat.js"></script>
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+  
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBdYrGNmRLjguVFF2l0ylP25pCVN42Tshc",
+      authDomain: "movies-rating-application.firebaseapp.com",
+      projectId: "movies-rating-application",
+      storageBucket: "movies-rating-application.appspot.com",
+      messagingSenderId: "531067134737",
+      appId: "1:531067134737:web:5f59b2f18da1c22934e2b0"
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+  </script>
   <script>
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
@@ -55,5 +76,7 @@
       });
     });
   </script>
+
+
 </body>
 </html>

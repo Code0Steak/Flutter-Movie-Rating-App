@@ -505,13 +505,18 @@
 import 'package:flutter/material.dart';
 import 'package:movies_app/components/app_bar.dart';
 import 'package:movies_app/models/movie_list.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 
 void main() {
-  runApp(const MyApp());
+  
+  runApp( MyApp());
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+   MyApp({Key? key}) : super(key: key);
+
+ 
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -535,82 +540,45 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     getData();
-    return MaterialApp(
-      title: 'Movies App',
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      onGenerateRoute: (settings) {
-        if (settings.name == '/') {
-          return MaterialPageRoute(builder: (context) =>  HomePage(
-        list: _list,
-      
-      ),
-      );
-        } else if (settings.name?.startsWith('/movie') == true) {
-          final String id = settings.name?.substring(7) ?? ''; //extract movie ID
-          MovieModel? mov;
-          for (var i = 0; i < _list.length; i++) {
-            if (int.parse(id) == _list[i].id) {
-              mov = _list[i];
+    return   MaterialApp(
+        title: 'Movies App',
+        debugShowCheckedModeBanner: false,
+        initialRoute: '/',
+        onGenerateRoute: (settings) {
+          if (settings.name == '/') {
+            return MaterialPageRoute(builder: (context) =>  HomePage(
+          list: _list,
+        
+        ),
+        );
+          } else if (settings.name?.startsWith('/movie') == true) {
+            final String id = settings.name?.substring(7) ?? ''; //extract movie ID
+            MovieModel? mov;
+            for (var i = 0; i < _list.length; i++) {
+              if (int.parse(id) == _list[i].id) {
+                mov = _list[i];
+              }
             }
+            return MaterialPageRoute(builder: (context) => MovieDetailsScreen(movie: mov!, updateMovieList: _updateMovieList));
           }
-          return MaterialPageRoute(builder: (context) => MovieDetailsScreen(movie: mov!, updateMovieList: _updateMovieList));
-        }
-
-        return null;
-      },
-      
-      
-    );
+    
+          return null;
+        },
+        
+        
+      );
+        
   }
 
   // Callback function to update the movie list
-  void _updateMovieList(MovieModel movie) {
+  void _updateMovieList(MovieModel mov) {
 
-    var newLis = _list;
-
-    for(var i = 0; i < newLis.length; i++) {
-      if (newLis[i].id == movie.id) {
-        newLis[i].rating = movie.rating;
-      }
-    }
 
     setState(() {
-      _list = newLis;
+      _list[mov.id].rating = mov.id;
     });
   }
 }
-
-
-// class MovieDetailsScreen extends StatelessWidget {
-//   final MovieModel movie;
-//   final Function(MovieModel) updateMovieRating;
-
-//   const MovieDetailsScreen({
-//     Key? key,
-//     required this.movie,
-//     required this.updateMovieRating,
-//   }) : super(key: key);
-  
-
-//   // Fetch movie details based on movieId and display them
-//   // You can use this.movieId to load the specific movie's details
-
-//   @override
-//   Widget build(BuildContext context) {
-//     // Build your movie detail screen based on the movieId
-//     // Fetch movie details and display them
-
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Movie Details'),
-//       ),
-//       body: Center(
-//         child: Text('Movie Details for ID: $movieId'),
-//       ),
-//     );
-//   }
-// }
 
 class MovieDetailsScreen extends StatefulWidget {
   final MovieModel movie;
@@ -639,16 +607,31 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Movie Details'),
+        title: const Text('Movie Details'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("This movie ${widget.movie.name}"),
+                Container(
+            height: 120.0,
+            width: 120.0,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(
+                    widget.movie.imgPath),
+                fit: BoxFit.fill,
+              ),
+              
+            ),
+        )
+    ,
+            Text(" ${widget.movie.name}"),
             const SizedBox(height: 20),
+            Text("Description: ${widget.movie.details}"),
             Text("Current Rating: $_rating"),
             const SizedBox(height: 20),
+            const Text("Rate the movie below:"),
             Slider(
               value: _rating.toDouble(),
               onChanged: (newValue) {
@@ -730,91 +713,96 @@ class HomePage extends StatelessWidget {
         SizedBox(
           height: 500,
           child: ListView.separated(
-            itemBuilder: (context, index) {
-              return Container(
-                width: 400,
-                decoration: BoxDecoration(
-                  color: list[index].boxColor.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Image(
-                      image: AssetImage(list[index].imgPath),
-                      fit: BoxFit.contain,
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          list[index].name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          list[index].rating != 0
-                              ? 'Rating: ${list[index].rating} ⭐'
-                              : '',
-                          style: const TextStyle(
-                            color: Color(0xff7B6F72),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      height: 45,
-                      width: 130,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            list[index].viewIsSelected
-                                ? const Color(0xff9DCEFF)
-                                : Colors.transparent,
-                            list[index].viewIsSelected
-                                ? const Color(0xff92A3FD)
-                                : Colors.transparent,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                      child: Center(
-                        child: GestureDetector(
-                              onTap: () {
-                                final movieId = list[index].id; // Assuming you have a unique movie identifier
-                                final movieUrl = '/movie/$movieId'; // Create the movie URL
-                                Navigator.of(context).pushNamed(movieUrl);
-                              },
-                              child: Text(
-                                'View',
-                                style: TextStyle(
-                                  color: list[index].viewIsSelected
-                                      ? Colors.white
-                                      : const Color(0xffC58BF2),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            separatorBuilder: (context, index) =>
-                const SizedBox(width: 25,),
-            itemCount: list.length,
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(
-              left: 20,
-              right: 20,
+  itemBuilder: (context, index) {
+    return Card(
+      elevation: 5,
+      color: list[index].boxColor, // Add elevation for shadow
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
+              child: Image(
+                image: AssetImage(list[index].imgPath),
+                fit: BoxFit.cover, // Adjust image alignment
+                height: 200, // Set the desired image height
+                width: 400, // Set the desired image width
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.all(8.0), // Add internal padding
+              child: Column(
+                children: [
+                  Text(
+                    list[index].name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    list[index].rating != 0
+                        ? 'Rating: ${list[index].rating} ⭐'
+                        : '',
+                    style: const TextStyle(
+                      color: Color(0xff7B6F72),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                final movieId = list[index].id; // Unique movie identifier
+                final movieUrl = '/movie/$movieId'; // Create the movie URL
+                Navigator.of(context).pushNamed(movieUrl);
+              },
+              child: Container(
+                height: 45,
+                width: 130,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xff9DCEFF),
+                      Color(0xff92A3FD),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: const Center(
+                  child: Text(
+                    'View',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  },
+  separatorBuilder: (context, index) => const SizedBox(width: 25),
+  itemCount: list.length,
+  scrollDirection: Axis.horizontal,
+  padding: const EdgeInsets.only(left: 20, right: 20),
+),
+
         )
       ],
     );
