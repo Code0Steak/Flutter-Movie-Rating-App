@@ -506,9 +506,21 @@ import 'package:flutter/material.dart';
 import 'package:movies_app/components/app_bar.dart';
 import 'package:movies_app/models/movie_list.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:movies_app/models/user.dart';
+import 'package:movies_app/service/flutter_auth_service.dart';
+import 'package:provider/provider.dart';
+import './secret/firebase_config.dart';
+
+// import './secret/firebase_config.dart';
+
+void main() async {
+
+    WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter is initialized
+  await Firebase.initializeApp(
+    options: const FirebaseOptions(apiKey: FirebaseConfig.apiKey, appId: FirebaseConfig.appId, messagingSenderId: FirebaseConfig.messagingSenderId, projectId: FirebaseConfig.projectId)
+  ); // Initialize Firebase
 
 
-void main() {
   
   runApp( MyApp());
 }
@@ -540,33 +552,48 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     getData();
-    return   MaterialApp(
-        title: 'Movies App',
-        debugShowCheckedModeBanner: false,
-        initialRoute: '/',
-        onGenerateRoute: (settings) {
-          if (settings.name == '/') {
-            return MaterialPageRoute(builder: (context) =>  HomePage(
-          list: _list,
-        
+    return   MultiProvider(
+      providers: [
+        Provider(
+          create: (_) => FirebaseAuthService(),
         ),
-        );
-          } else if (settings.name?.startsWith('/movie') == true) {
-            final String id = settings.name?.substring(7) ?? ''; //extract movie ID
-            MovieModel? mov;
-            for (var i = 0; i < _list.length; i++) {
-              if (int.parse(id) == _list[i].id) {
-                mov = _list[i];
-              }
+        StreamProvider<AppUser?>(create: (context) => context.read<FirebaseAuthService>().onAuthStateChanged , initialData: null,)
+      ],
+      child: MaterialApp(
+          title: 'Movies App',
+          debugShowCheckedModeBanner: false,
+          initialRoute: '/',
+          home: Consumer<AppUser?> (builder: (_, user,__){
+            if (user == null) {
+              return const Text("Not Signed In");
+            } else {
+              return const Text("Signed In");
             }
-            return MaterialPageRoute(builder: (context) => MovieDetailsScreen(movie: mov!, updateMovieList: _updateMovieList));
-          }
-    
-          return null;
-        },
-        
-        
-      );
+          }),
+          onGenerateRoute: (settings) {
+            if (settings.name == '/') {
+              return MaterialPageRoute(builder: (context) =>  HomePage(
+            list: _list,
+          
+          ),
+          );
+            } else if (settings.name?.startsWith('/movie') == true) {
+              final String id = settings.name?.substring(7) ?? ''; //extract movie ID
+              MovieModel? mov;
+              for (var i = 0; i < _list.length; i++) {
+                if (int.parse(id) == _list[i].id) {
+                  mov = _list[i];
+                }
+              }
+              return MaterialPageRoute(builder: (context) => MovieDetailsScreen(movie: mov!, updateMovieList: _updateMovieList));
+            }
+      
+            return null;
+          },
+          
+          
+        ),
+    );
         
   }
 

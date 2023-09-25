@@ -24,6 +24,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="movies_app">
+  <meta name="google-signin-client_id" content="531067134737-ir04c4itbk3k5ccj5o3o2pl6egfvf99l.apps.googleusercontent.com">
+
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
@@ -36,8 +38,8 @@
     // The value below is injected by flutter build, do not touch.
     const serviceWorkerVersion = null;
   </script>
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
+  
+  
 </head>
 <body>
   <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
@@ -61,6 +63,9 @@
     // Initialize Firebase
     const app = initializeApp(firebaseConfig);
   </script>
+
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script>
   <script>
     window.addEventListener('load', function(ev) {
       // Download main.dart.js

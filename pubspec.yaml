@@ -72,6 +72,7 @@ flutter:
      - assets/theSocialNetwork.jpg
      - assets/RED-NOTICE.jpg
      - assets/mi.jpg
+     
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
