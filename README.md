@@ -1,17 +1,21 @@
-# movies_app
+# movies_rating_app
 
 (Assignment)
 
 ## Project Setup
 Clone this app: ```git clone https://github.com/Code0Steak/Flutter-Movie-Rating.git```
 
-This project is a starting point for a Flutter application.
+### Step 1: 
+Open up the project in a suitable editor. Open up a terminal and run : ```flutter pub get```, to get all the dependencies
 
-A few resources to get you started if this is your first Flutter project:
+### Step 3:
+Firebase setup for Auth. (To Skip this I will host the page, soon)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Step 4:
+```flutter run -d Chrome --web-port=3000```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
+## Application Snapshots
+
+
+
