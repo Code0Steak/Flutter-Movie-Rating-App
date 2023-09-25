@@ -1,8 +1,9 @@
 # movies_app
 
-A new Flutter project.
+(Assignment)
 
-## Getting Started
+## Project Setup
+Clone this app: ```git clone https://github.com/Code0Steak/Flutter-Movie-Rating.git```
 
 This project is a starting point for a Flutter application.
 
