@@ -504,6 +504,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:movies_app/components/app_bar.dart';
+import 'package:movies_app/components/authComponents/sign_in_view.dart';
 import 'package:movies_app/models/movie_list.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:movies_app/models/user.dart';
@@ -565,19 +566,21 @@ class _MyAppState extends State<MyApp> {
           initialRoute: '/',
           home: Consumer<AppUser?> (builder: (_, user,__){
             if (user == null) {
-              return const Text("Not Signed In");
+              return const SignInView();
             } else {
-              return const Text("Signed In");
+              return  HomePage(
+            list: _list);
             }
           }),
           onGenerateRoute: (settings) {
-            if (settings.name == '/') {
-              return MaterialPageRoute(builder: (context) =>  HomePage(
-            list: _list,
+          //   if (settings.name == '/') {
+          //     return MaterialPageRoute(builder: (context) =>  HomePage(
+          //   list: _list,
           
-          ),
-          );
-            } else if (settings.name?.startsWith('/movie') == true) {
+          // ),
+          // );
+          //   } else 
+          if (settings.name?.startsWith('/movie') == true) {
               final String id = settings.name?.substring(7) ?? ''; //extract movie ID
               MovieModel? mov;
               for (var i = 0; i < _list.length; i++) {
